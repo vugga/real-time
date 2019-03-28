@@ -1,6 +1,6 @@
 {
   "name": "@vuga/real-time",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Redis + Presence + Socket.io/IO-Redis",
   "keywords": [
     "redis",
