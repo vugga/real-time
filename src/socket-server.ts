@@ -6,7 +6,7 @@ import ioRedis from 'socket.io-redis';
 import l from './log';
 
 
-interface Props {
+interface SocketServerProps {
   express: {
     app: Application,
     port: number,
@@ -18,7 +18,7 @@ interface Props {
   }
 }
 
-interface Returns {
+interface SocketServerOutput {
   socketIo: SocketIO.Server,
   expressApp: Application
 }
@@ -35,7 +35,7 @@ export default class SocketServer {
   private app: Application;
   private server: Server;
   private io: SocketIO.Server;
-  private socket: any;
+  private connectedSocket: any;
   private port: string | number;
   private redisApp = redis.createClient;
 
@@ -48,9 +48,9 @@ export default class SocketServer {
   }
 
   /**
-   * init
+   * Initialise SocketServer 
    */
-  public init({ express, redis }: Props): Returns {
+  public init({ express, redis }: SocketServerProps): SocketServerOutput {
 
     /** If already intialised */
     if (this.io) {
@@ -90,7 +90,7 @@ export default class SocketServer {
     this.io.on('connect', (socket: any) => {
       l.info('Connected client on port %s.', this.port);
 
-      this.socket = socket;
+      this.connectedSocket = socket;
 
       socket.on('disconnect', () => {
         l.info('Client disconnected');
@@ -107,15 +107,24 @@ export default class SocketServer {
   private constructor() {
   }
 
+  /**
+   * Get Express Application
+   */
   public getApp(): Application {
     return this.app;
   }
 
+  /**
+   * Get SocketIO.Server
+   */
   public getIo(): SocketIO.Server {
     return this.io;
   }
 
+  /**
+   * Get current connected SocketIO.Socket
+   */
   public getSocket(): SocketIO.Socket {
-    return this.socket;
+    return this.connectedSocket;
   }
 }
