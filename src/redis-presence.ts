@@ -1,32 +1,30 @@
-import redis, { RedisClient } from 'redis';
-import l from './log';
+import redis, { RedisClient } from 'redis'
+import l from './log'
 
 interface PresenceData {
-  connectionId: string;
-  when: Date;
+  connectionId: string
+  when: Date
   meta?: {
-    [fieldName: string]: string;
-  };
+    [fieldName: string]: string
+  }
 }
 
-export default class Presence {
+export class Presence {
+  private static _instance: Presence
+  public client: RedisClient
+  public clientSub: RedisClient
+  public presenceKey: string = 'redis-presence'
 
-  private static _instance: Presence;
-  public client: RedisClient;
-  public clientSub: RedisClient;
-  public presenceKey: string = 'redis-presence';
-
-  private constructor() {
-  }
+  private constructor() {}
 
   public init(redisIP: string, redisPort: number, redisPassword: string, presenceKey: string) {
     this.client = redis.createClient(redisPort || 6379, redisIP, {
       auth_pass: redisPassword || '',
       return_buffers: true
-    });
+    })
 
     if (presenceKey) {
-      this.presenceKey = presenceKey;
+      this.presenceKey = presenceKey
     }
 
     // this.clientSub = redis.createClient(redisPort || 6379, redisIP, {
@@ -37,12 +35,11 @@ export default class Presence {
     //  // Add redis adapter to socket.io Redis adapter
     //  // @ts-ignore
     //  io.adapter(ioRedis({ pubClient: this.client, subClient: this.clientSub }));
-
   }
 
   public static get Instance() {
     // Do you need arguments? Make it a regular method instead.
-    return this._instance || (this._instance = new this());
+    return this._instance || (this._instance = new this())
   }
 
   /**
@@ -54,18 +51,18 @@ export default class Presence {
     const data = JSON.stringify({
       meta,
       when: Date.now()
-    });
+    })
 
     return new Promise((resolve, reject) => {
       this.client.hset(this.presenceKey, connectionId, data, err => {
         if (err) {
-          l.error('Failed to store presence in redis: ' + err);
-          return reject(err);
+          l.error('Failed to store presence in redis: ' + err)
+          return reject(err)
         }
-        l.info('Added ', connectionId);
-        return resolve(connectionId);
-      });
-    });
+        l.info('Added ', connectionId)
+        return resolve(connectionId)
+      })
+    })
   }
 
   /**
@@ -78,28 +75,28 @@ export default class Presence {
       // Check if we already have this client
       this.client.hget(this.presenceKey, connectionId, (err, preza) => {
         if (err) {
-          l.error('Nope we dont have this client', err);
-          return rej('Nope we dont have this client');
+          l.error('Nope we dont have this client', err)
+          return rej('Nope we dont have this client')
         }
 
-        const existing = preza ? JSON.parse(preza) : {};
+        const existing = preza ? JSON.parse(preza) : {}
 
         const data = JSON.stringify({
           meta: { ...existing.meta, ...meta },
           when: Date.now()
-        });
+        })
 
         this.client.hset(this.presenceKey, connectionId, data, err => {
           if (err) {
-            l.error('Failed to store presence in redis: ' + err);
-            return rej(new Error('Failed to store presence in redis: ' + err));
+            l.error('Failed to store presence in redis: ' + err)
+            return rej(new Error('Failed to store presence in redis: ' + err))
           }
-          l.info('ID', connectionId);
-          l.info('UPDATED WITH ', data);
-          return res(connectionId);
-        });
-      });
-    });
+          l.info('ID', connectionId)
+          l.info('UPDATED WITH ', data)
+          return res(connectionId)
+        })
+      })
+    })
   }
 
   /**
@@ -111,73 +108,75 @@ export default class Presence {
     return new Promise((resolve, reject) => {
       this.client.hdel(this.presenceKey, connectionId, err => {
         if (err) {
-          l.error('Failed to remove presence in redis: ' + err);
-          return reject(err);
+          l.error('Failed to remove presence in redis: ' + err)
+          return reject(err)
         }
-        l.info('removed presence in redis: ' + connectionId);
-        return resolve(connectionId);
-      });
-    });
+        l.info('removed presence in redis: ' + connectionId)
+        return resolve(connectionId)
+      })
+    })
   }
 
   public async get(connectionId: string): Promise<object> {
     if (!connectionId) {
-      return Promise.reject(null);
+      return Promise.reject(null)
     }
 
     return new Promise((res, rej) => {
       this.client.hget(this.presenceKey, connectionId, (err, data) => {
         if (err) {
-          return rej(err);
+          return rej(err)
         }
         try {
-          res(JSON.parse(data));
+          res(JSON.parse(data))
         } catch (error) {
-          l.info(error);
-          rej(err);
+          l.info(error)
+          rej(err)
         }
-      });
-    });
+      })
+    })
   }
 
   /**
    * list
    */
   public async list(): Promise<any> {
-    const active: PresenceData[] = [];
-    const dead: PresenceData[] = [];
-    const now = Date.now();
+    const active: PresenceData[] = []
+    const dead: PresenceData[] = []
+    const now = Date.now()
 
-    return new Promise((res) => {
+    return new Promise(res => {
       this.client.hgetall(this.presenceKey, (err, presence: any) => {
         if (err) {
-          l.info('Failed to get presence from Redis, returning empty: ' + err);
-          return res([]);
+          l.info('Failed to get presence from Redis, returning empty: ' + err)
+          return res([])
         }
 
         // tslint:disable-next-line:forin
         for (const connection in presence) {
-          const details = JSON.parse(presence[connection]);
+          const details = JSON.parse(presence[connection])
           // details.connection = connection;
           if (now - details.when < 8000) {
-            active.push(details);
+            active.push(details)
           } else {
-            dead.push(details);
+            dead.push(details)
           }
         }
 
         if (dead.length) {
           // self._clean(dead);
         }
-        return res(active);
-      });
-    });
+        return res(active)
+      })
+    })
   }
 
   public clean(toDelete: any[]): void {
-    l.info(`Cleaning ${toDelete.length} expired presences`);
+    l.info(`Cleaning ${toDelete.length} expired presences`)
     for (const presence of toDelete) {
-      this.remove(presence.connection);
+      this.remove(presence.connection)
     }
   }
 }
+
+export default Presence

@@ -7,7 +7,7 @@
     "pubsub",
     "typescript"
   ],
-  "main": "dist/index.umd.js",
+  "main": "dist/index.js",
   "module": "dist/index.es6.js",
   "typings": "dist/types/index.d.ts",
   "files": [
@@ -101,7 +101,6 @@
     "jest": "24.5.0",
     "jest-config": "24.5.0",
     "lint-staged": "8.1.5",
-    "lodash.camelcase": "4.3.0",
     "prettier": "1.16.4",
     "prompt": "1.0.0",
     "replace-in-file": "3.4.4",
