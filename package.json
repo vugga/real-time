@@ -1,6 +1,6 @@
 {
   "name": "@vuga/real-time",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Redis + Presence + Socket.io/IO-Redis",
   "keywords": [
     "redis",
@@ -31,7 +31,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:prod": "npm run lint",
-    "deploy-docs": "ts-node tools/gh-pages-publish",
+    "deploy-docs": "npm build && ts-node tools/gh-pages-publish",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "commit": "git-cz",
     "semantic-release": "semantic-release",
