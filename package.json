@@ -1,6 +1,6 @@
 {
   "name": "@vuga/real-time",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Redis + Presence + Socket.io/IO-Redis",
   "keywords": [
     "redis",
@@ -84,6 +84,12 @@
     "redis": "^2.8.0",
     "socket.io": "^2.2.0",
     "socket.io-redis": "^5.2.0"
+  },
+  "peerDependencies": {
+    "pino": ">= 5.12.0",
+    "redis": ">= 2.8.0",
+    "socket.io": ">= 2.2.0",
+    "socket.io-redis": ">= 5.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "7.5.2",

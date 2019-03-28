@@ -14,7 +14,13 @@ export default {
   ],
   sourcemap: true,
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
-  external: ['@types/ioredis', '@types/bluebird'],
+  external: [
+    '@types/ioredis', 
+    '@types/bluebird', 
+    'uws',
+    'hiredis', 'http', 'crypto', 'events', 'util', 'tls', 'net', 'path', 'fs', 'url', 'os', 'assert',
+    'tty', 'querystring', 'stream', 'https', 'utf-8-validate', 'bufferutil', 'zlib', 'buffer'
+  ],
   watch: {
     include: 'src/**',
   },
